@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mercury/database/expense_database.dart';
+import 'package:mercury/models/expense.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,7 +11,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
@@ -33,9 +35,41 @@ class _HomePageState extends State<HomePage> {
                 keyboardType: TextInputType.number,
                 controller: amountController,
               ),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Add Expense'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      //* only save if both fields are filled
+                      if (nameController.text.isNotEmpty &&
+                          amountController.text.isNotEmpty) {
+                        //*pop box
+                        Navigator.pop(context);
+
+                        //*create new db
+                        Expense newExpense = Expense(
+                          name: nameController.text, 
+                          amount: double.parse(amountController.text), 
+                          date: DateTime.now()
+                        );
+
+                        //*save to db
+                        await context.read<ExpenseDatabase>().createNewExpense(newExpense);
+
+                        //*clear text fields
+                        nameController.clear();
+                        amountController.clear();
+                      }
+                    },
+                    child: const Text('Add Expense'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                ],
               ),
             ],
           ),
