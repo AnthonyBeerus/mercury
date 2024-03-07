@@ -37,7 +37,7 @@ class MyListTile extends StatelessWidget {
       ),
       child: ListTile(
         title: Text(title),
-        subtitle: Text(trailing),
+        trailing: Text(trailing),
       ),
     );
   }
