@@ -167,30 +167,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   //* delete expense dialob box
-  void openDeleteBox() {
+  void openDeleteBox(Expense expense) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Expense'),
         content: const Text('Are you sure you want to delete this expense?'),
         actions: [
+          //*delete option
+          _deleteButton(expense.id),
+
+          //*cancel option
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Delete'),
-          ),
         ],
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseDatabase>(
@@ -213,10 +211,24 @@ class _HomePageState extends State<HomePage> {
                 title: individualExpense.name,
                 trailing: formatAmount(individualExpense.amount),
                 onEditPressed: (context) => openEditBox(individualExpense, context),
-                onDeletePressed: (context) => openDeleteBox,
+                onDeletePressed: (context) => openDeleteBox(individualExpense),
               );
             },
           )),
+    );
+  }
+
+  //* delete expense button 
+  Widget _deleteButton(int id) {
+    return ElevatedButton(
+      onPressed: () async {
+        //* pop box
+        Navigator.pop(context);
+        
+        //* delete from db
+        await context.read<ExpenseDatabase>().deleteExpense(id);
+      },
+      child: const Text('Delete'),
     );
   }
 }
