@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mercury/components/list_tile.dart';
 import 'package:mercury/database/expense_database.dart';
+import 'package:mercury/helper%20functions/currency_format.dart';
 import 'package:mercury/models/expense.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +15,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
+
+  @override
+  void initState() {
+    Provider.of<ExpenseDatabase>(context, listen: false).readExpenses();
+
+    super.initState();
+  }
 
   void newExpense() {
     showModalBottomSheet(
@@ -48,13 +57,14 @@ class _HomePageState extends State<HomePage> {
 
                         //*create new db
                         Expense newExpense = Expense(
-                          name: nameController.text, 
-                          amount: double.parse(amountController.text), 
-                          date: DateTime.now()
-                        );
+                            name: nameController.text,
+                            amount: double.parse(amountController.text),
+                            date: DateTime.now());
 
                         //*save to db
-                        await context.read<ExpenseDatabase>().createNewExpense(newExpense);
+                        await context
+                            .read<ExpenseDatabase>()
+                            .createNewExpense(newExpense);
 
                         //*clear text fields
                         nameController.clear();
@@ -80,12 +90,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => newExpense(),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    return Consumer<ExpenseDatabase>(
+      builder: (context, value, child) => Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => newExpense(),
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          body: ListView.builder(
+            itemCount: value.allExpense.length,
+            itemBuilder: (context, index) {
+              //* Extract individual expense
+              Expense individualExpense = value.allExpense[index];
+
+              //* return ListTile
+              return MyListTile(
+                //* return ListTile
+                title: individualExpense.name,
+                trailing: formatAmount(individualExpense.amount),
+              );
+            },
+          )),
     );
   }
 }
